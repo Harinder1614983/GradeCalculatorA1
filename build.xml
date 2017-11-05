@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<project name="java-junit-template-project" default="finish" basedir="." xmlns:ac="antlib:net.sf.antcontrib">
+	<property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
+	<property name="build.dir" value="${basedir}/build" />
+	<property name="main.build.dir" value="${basedir}/build/main" />
+	<property name="main.src.dir" value="${basedir}/src" />
+	<property name="report.dir" value="${basedir}/build/report" />
+	<property name="lib.dir" value="${basedir}/lib" />
+	<mkdir dir="build"/>
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar" />
+		<fileset dir="${lib.dir}" includes="*.jar" />
+		<pathelement location="${main.build.dir}" />
+		<pathelement location="${basedir}/../org.eclipse.jdt.core/bin"/>
+	</path>
+
+	<taskdef uri="antlib:net.sf.antcontrib" resource="net/sf/antcontrib/antlib.xml">
+		<classpath>
+			<pathelement location="${lib.dir}/ant-contrib-1.0b3.jar"/>
+		</classpath>
+	</taskdef>
+
+	<target name="compile">
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${main.build.dir}" />
+		<mkdir dir="${report.dir}" />
+		<echo message="Compile: started" />
+		<componentdef classname="org.eclipse.jdt.core.JDTCompilerAdapter" name="ejc" classpath="${lib.dir}/ecj-4.8M2.jar"/>
+		<javac srcdir="${main.src.dir}" destdir="${main.build.dir}" includeantruntime="false">
+			<classpath refid="classpath"/>
+			<ejc/>
+		</javac>
+		<echo message="Compile: done" />
+	</target>
+
+	<target name="test" depends="start, compile">
+		<echo>Testing: started - this might take a while, please be patient...</echo>
+		<junit fork="true" forkmode="perBatch" haltonfailure="false" printsummary="false" failureproperty="test.failed" errorproperty="test.failed">
+			<classpath refid="classpath"/>
+			<formatter type="xml" usefile="true" />
+			<batchtest todir="build/report">
+				<zipfileset src="lib/test.jar" includes="**/GradeCalculatorConsoleOutputTest.class" />
+			</batchtest>
+		</junit>
+		<echo>Testing: done</echo>
+	</target>
+
+	<target name="your asessment" depends="test">
+		<xmlproperty file="build/report/TEST-uk.ac.brunel.cs1702.GradeCalculatorConsoleOutputTest.xml" prefix="TEST" collapseAttributes="true" />
+		<math operation="-" operator1="${TEST.testsuite.tests}" operator2="${TEST.testsuite.failures}" result="passing" />
+		<math operation="-" operator1="${passing}" operator2="${TEST.testsuite.errors}" result="passing" />
+		<math operation="/" operator1="${passing}" operator2="${TEST.testsuite.tests}" result="marks" />
+		<math operation="*" operator1="${marks}" operator2="100" result="marks" />
+		<math operation="p" operator1="${marks}" operator2="dummy" result="printmarks" />
+		<math operation="*" operator1="${marks}" operator2="0.1" result="totalmarks" />
+		<math operation="p" operator1="${totalmarks}" operator2="dummy" result="printtotalmarks" />
+		<echo> This take-home worksheet (A1) is assessed and contributes 10% towards your total marks.</echo>
+		<echo>******************************************************************************************************************************</echo>
+		<echo>* With your current progress you get ${printmarks} (over 100) from this assignment.</echo> 
+		<echo>* Overall, this contributes towards your total marks with ${printtotalmarks} (over 100).</echo>
+		<echo>* Below is a list of issues (if any), to serve you as a to-do list, you should fix to get a higher mark.</echo>
+		<echo>* If you see any issues starting with 'FIX THIS BEFORE ANY OTHER:...', doing so might automatically get rid of other issues.</echo>
+		<echo>* Keep in mind that you can improve your mark until the submission deadline (19.11.2017) for this assignment!</echo>
+		<echo>* Details of submission process was part of A0, which you must have already completed!</echo>
+		<echo>******************************************************************************************************************************</echo>
+	</target>
+
+	<target name="your to-do list">
+		<ac:if>
+			<not>
+				<equals arg1="${TEST.testsuite.tests}" arg2="${passing}"/>
+			</not>
+			<ac:then>
+				<echo>*********************************************************************</echo>
+				<ac:for list="${TEST.testsuite.testcase.failure.message}" param="message">
+					<sequential>
+						<echo>@{message}</echo>
+						<echo>*********************************************************************</echo>
+					</sequential>
+				</ac:for>
+			</ac:then>
+			<ac:else>
+				<echo message="No issues found. Well done!" />
+			</ac:else>
+		</ac:if>
+	</target>
+
+	<target name="finish" depends="your asessment, your to-do list" />
+	<!-- delete all class files -->
+	<!-- To run this: use "ant clean" -->
+	<target name="start">
+		<echo message="Clean: started" />
+		<delete>
+			<fileset dir="build" includes="**/*" />
+		</delete>
+		<echo message="Clean: done" />
+	</target>
+
+	<!-- create macrodef -->
+	<macrodef name="math">
+		<attribute name="operation" />
+		<attribute name="operator1" />
+		<attribute name="operator2" />
+		<attribute name="result" />
+		<sequential>
+			<script language="javascript">
+	     tmp = 0;
+	     switch ("@{operation}")
+	     {
+	      case "+" :
+	       tmp = parseFloat("@{operator1}") + parseFloat("@{operator2}");
+	       break;
+	      case "-" :
+	       tmp = parseFloat("@{operator1}") - parseFloat("@{operator2}");
+	       break;
+	      case "*" :
+	       tmp = parseFloat("@{operator1}") * parseFloat("@{operator2}");
+	       break;
+	      case "/" :
+	       tmp = parseFloat("@{operator1}") / parseFloat("@{operator2}");
+	       break;
+		  case "p" :
+		   tmp = (@{operator1}).toFixed(2);
+		   break;
+	     }
+	     project.setProperty("@{result}", tmp);
+	    </script>
+		</sequential>
+	</macrodef>
+</project>
+
+

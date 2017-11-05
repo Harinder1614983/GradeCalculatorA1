@@ -1,0 +1,15 @@
+engines:
+  checkstyle:
+    enabled: true
+  pmd:
+    enabled: true
+  fixme:
+    enabled: true
+
+ratings:
+  paths:
+  - "**.java"
+
+exclude_paths:
+- "lib/"
+- "build.xml"
