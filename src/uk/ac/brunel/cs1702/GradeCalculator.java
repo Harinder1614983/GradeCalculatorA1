@@ -6,12 +6,16 @@ import java.util.Scanner;
 
 public class main {
 
+	// declaration of static constants with value
+	
 	public static final 	double W1 = 0.10;
 	public static final 	double W2 = 0.10;
 	public static final 	double W3 = 0.15;
 	public static final 	double W4 = 0.15;
 	public static final 	double W5 = 0.25;
 	public static final 	double W6 = 0.25;
+	
+	// declaration of static variables
 	
 	public static double a1;
 	public static double a2;
@@ -28,6 +32,8 @@ public class main {
 	public static String finalGrade;
 
 	public static Scanner scanner = new Scanner(System.in);
+	
+	// Here the user is inputting the grades for the worksheets and the viva grade
 	
 	public static void main(String[] args) {
 		System.out.println("Enter First worksheet grade:");
@@ -60,6 +66,7 @@ public class main {
 		System.out.println("Enter Second Viva grade:");
 		v2 = scanner.next();
 		
+		// to calculate total marks all grades are added together
 		
 		totalMarks = a1 + a2 + a3 + a4 + a5 + a6;
 
@@ -110,12 +117,14 @@ public class main {
 			}	
 		}
 		
+		// System will output result in this structure
+		
 		System.out.println("Total Marks: " + totalMarks);
 		System.out.println("Viva Grade: " + maxV);
 		System.out.println("Final Grade: " + finalGrade);
 	}
 	
-	
+	// Will assign grade if total is fallen in the score category
 	
 	public static void checkTotalMarksA() {
 		if (totalMarks >= 70) {
